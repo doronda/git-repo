@@ -5,5 +5,7 @@ package com.example.doronda.rgbcircles;
  */
 public interface ICanvasView {
     void drawCircle(SimpleCircle mainCircle);
-    //void redraw();
+
+    void redraw();
+
 }

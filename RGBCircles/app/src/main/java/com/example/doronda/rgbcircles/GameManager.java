@@ -26,11 +26,14 @@ public class GameManager {
     }
 
     private void initEnemyCircles() {
-
+        SimpleCircle mCircleArea = mCircle.getCircleArea();
         enemyCircles = new ArrayList<EnemyCircle>();
         for(int i =0; i< ENEMY_COUNT; i++){
             EnemyCircle circle;
-            circle = EnemyCircle.getRandomCircle();
+
+            do {
+                circle = EnemyCircle.getRandomCircle();
+            } while (circle.isIntersect(mCircleArea));
             enemyCircles.add(circle);
         }
         calculateAndSetCirclesColor();
@@ -60,6 +63,29 @@ public class GameManager {
     public void onTouchEvent(int x, int y) {
 
         mCircle.moveCircleWhenTouchAt(x, y);
+        checkCollision();
+        moveCircles();
+    }
+
+    private void checkCollision() {
+        for(EnemyCircle circle : enemyCircles){
+
+            if(mCircle.isIntersect(circle)){
+                gameOver();
+            }
+        }
+    }
+
+    private void gameOver() {
+        mCircle.initRadius();
+        initEnemyCircles();
+        canvasView.redraw();
+    }
+
+    private void moveCircles() {
+        for(EnemyCircle circle : enemyCircles){
+            circle.moveOneStep();
+        }
     }
 
     public static int getWidth() {
