@@ -4,11 +4,14 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.support.design.widget.Snackbar;
 import android.util.AttributeSet;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 /**
  * Created by doronda on 01.12.2015.
@@ -20,6 +23,7 @@ public class CanvasView extends View implements ICanvasView{
     private GameManager gManager;
     private  Paint paint;
     private  Canvas canvas;
+    private Snackbar snack;
 
     public CanvasView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -63,6 +67,15 @@ public class CanvasView extends View implements ICanvasView{
     @Override
     public void redraw() {
         invalidate();
+    }
+
+    @Override
+    public void showMessage(String text) {
+         if(snack!=null) {snack.dismiss();}
+        snack =  Snackbar.make(this,text,Snackbar.LENGTH_LONG);
+
+        snack.show();
+
     }
 
     @Override
