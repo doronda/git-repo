@@ -1,5 +1,7 @@
 package com.example.doronda.rgbcircles;
 
+import android.graphics.Color;
+
 /**
  * Created by doronda on 01.12.2015.
  */
@@ -7,9 +9,11 @@ public class MainCircle extends SimpleCircle{
 
     public static final int RADIUS = 50;
     public static final int SPEED = 30;
+    public static final int BLUE = Color.BLUE;
 
     public MainCircle(int x, int y) {
         super(x, y, RADIUS);
+        setColor(BLUE);
     }
 
 
