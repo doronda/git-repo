@@ -6,22 +6,32 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
 /**
  * Created by doronda on 01.12.2015.
  */
-public class CanvasView extends View {
+public class CanvasView extends View implements ICanvasView{
 
     private static int width;
     private static int height;
     private GameManager gManager;
+    private  Paint paint;
+    private  Canvas canvas;
 
     public CanvasView(Context context, AttributeSet attrs) {
         super(context, attrs);
         initWidthAndHeght(context);
+        initPaint();
         gManager = new GameManager(this, width, height);
+    }
+
+    private void initPaint() {
+        paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.FILL);
     }
 
     private void initWidthAndHeght(Context context) {
@@ -38,7 +48,26 @@ public class CanvasView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        gManager.onDraw(canvas);
+       // gManager.onDraw();
+        this.canvas = canvas;
+        gManager.onDraw();
 
+    }
+
+    @Override
+    public void drawCircle(MainCircle mainCircle) {
+        canvas.drawCircle(mainCircle.getX(), mainCircle.getY(), mainCircle.getRadius(), paint);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        int x = (int) event.getX();
+        int y = (int) event.getY();
+        if(event.getAction()==MotionEvent.ACTION_MOVE){
+            gManager.onTouchEvent(x,y);
+        }
+        invalidate();
+        return true;
     }
 }

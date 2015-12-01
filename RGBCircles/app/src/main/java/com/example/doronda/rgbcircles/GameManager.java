@@ -9,33 +9,39 @@ import android.graphics.Paint;
 public class GameManager {
 
     private CanvasView canvasView;
-    private int width;
-    private int height;
+    private static int width;
+    private static int height;
     private MainCircle mCircle;
-    private Paint paint;
 
     public GameManager(CanvasView c, int w, int h) {
         canvasView = c;
         width = w;
         height = h;
         initMainCircle();
-        initPaint();
-
     }
 
-    private void initPaint() {
-        paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setStyle(Paint.Style.FILL);
-    }
+
 
     private void initMainCircle() {
         mCircle = new MainCircle(width/2, height/2);
     }
 
-    public void onDraw(Canvas canvas) {
+    public void onDraw() {
 
-        canvas.drawCircle(mCircle.getX(), mCircle.getY(), mCircle.getRadius(), paint);
+        canvasView.drawCircle(mCircle);
 
+    }
+
+    public void onTouchEvent(int x, int y) {
+
+        mCircle.moveCircleWhenTouchAt(x, y);
+    }
+
+    public static int getWidth() {
+        return width;
+    }
+
+    public static int getHeight() {
+        return height;
     }
 }
