@@ -11,29 +11,21 @@ import android.view.View;
  */
 public class CanvasView extends View {
 
-    private MainCircle mCircle;
-    private Paint paint;
+    private GameManager gManager;
+
 
 
     public CanvasView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initMainCircle();
-        initPaint();
+        gManager = new GameManager();
+
     }
 
-    private void initPaint() {
-        paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setStyle(Paint.Style.FILL);
-    }
-
-    private void initMainCircle() {
-        mCircle = new MainCircle(200,500);
-    }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawCircle(mCircle.getX(), mCircle.getY(), mCircle.getRadius(), paint);
+        gManager.onDraw(canvas);
+
     }
 }
