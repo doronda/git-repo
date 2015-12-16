@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Primes</string>
+    <string name="str_threads_count_enter">Enter the number of threads</string>
+    <string name="str_ok_button">Ok</string>
+    <string name="str_list_of_numbers">List of numbers</string>
+    <string name="str_range">Range</string>
+    <string name="str_event_date">Event date</string>
+    <string name="str_threads_count">Number of threads</string>
+    <string name="str_menu_threads">Threads</string>
+    <string name="str_menu_history">History</string>
+    <string name="str_menu_graph">Graph</string>
+</resources>

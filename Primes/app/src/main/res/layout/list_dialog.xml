@@ -1,0 +1,28 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/lay_list_dialog"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:orientation="vertical"
+    android:padding="15dp">
+
+    <TextView
+        android:id="@+id/lbl_your_name"
+        android:text="@string/str_list_of_numbers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_below="@id/lbl_your_name"
+        android:layout_above="@+id/btn_ok"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></ListView>
+
+    <Button
+        android:id="@id/btn_ok"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/str_ok_button"/>
+</RelativeLayout>
