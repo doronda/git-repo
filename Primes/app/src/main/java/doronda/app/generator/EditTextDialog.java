@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 /**
  * Created by doronda on 14.12.2015.
@@ -33,6 +34,19 @@ public class EditTextDialog extends DialogFragment {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(mEditText.getText().toString().length() == 0){
+                    Toast.makeText(getActivity(), "Enter the value", Toast.LENGTH_SHORT).show();
+                    return;
+                } else
+                try {
+                    if (Integer.valueOf(mEditText.getText().toString()) < 1 || Integer.valueOf(mEditText.getText().toString()) > GeneratorActivity.NUMBER_OF_CORES * 5) {
+                        Toast.makeText(getActivity(), "Enter the value from 1 to " + String.valueOf(GeneratorActivity.NUMBER_OF_CORES * 5), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                } catch (NumberFormatException ne){
+                    Toast.makeText(getActivity(), "Enter the value from 1 to " + String.valueOf(GeneratorActivity.NUMBER_OF_CORES * 5), Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 threadCount = Integer.parseInt(mEditText.getText().toString());
                 dismiss();
             }

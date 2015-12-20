@@ -26,14 +26,17 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout;
+import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayoutDirection;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 
+public class GeneratorActivity extends AppCompatActivity  {
 
-public class GeneratorActivity extends AppCompatActivity {
-
+    static int NUMBER_OF_CORES;
     ListView lv;
     private int range;
     private GeneratorFragment fragment;
@@ -53,9 +56,10 @@ public class GeneratorActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         DBAdapter.getInstance(getApplicationContext()).open();
-
+        NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
         arr = new ArrayList<>();
         lv = (ListView) findViewById(R.id.list_simple_didgites);
+
         if (savedInstanceState == null) {
             fragment = new GeneratorFragment();
             getFragmentManager().beginTransaction().add(android.R.id.content, fragment).commit();
@@ -109,15 +113,26 @@ public class GeneratorActivity extends AppCompatActivity {
                 Bundle bundle = msg.getData();
                 ArrayList<Integer> arrayList = bundle.getIntegerArrayList("ARR");
                 arr.addAll(arrayList);
+                Collections.sort(arr);
                 if(count == EditTextDialog.threadCount){
                     long mEndTime = SystemClock.elapsedRealtime();
                     DBAdapter.getInstance(getApplicationContext()).insertHistoryItem(timeFormat.format(Calendar.getInstance().getTime()), edtRange.getText().toString(), EditTextDialog.threadCount, ((float)(mEndTime - mStartTime)/1000));
                     if( DBAdapter.getInstance(getApplicationContext()).getRange()<range){
-                        DBAdapter.getInstance(getApplicationContext()).insertCache(arr);
-                        DBAdapter.getInstance(getApplicationContext()).updateRange(range);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                DBAdapter.getInstance(getApplicationContext()).insertCache(arr);
+                                DBAdapter.getInstance(getApplicationContext()).updateRange(range);
+                            }
+                        }).start();
+
                     }
 
                     set(arr);
+                    if (GeneratorActivity.pb.isShown()) {
+                        GeneratorActivity.pb.setVisibility(ProgressBar.INVISIBLE);
+                    }
+                    GeneratorFragment.isTaskRunning = false;
                 }
             }
         };
@@ -126,6 +141,15 @@ public class GeneratorActivity extends AppCompatActivity {
     public void startGeneration(){
         if(edtRange.getText().toString().length() == 0){
             Toast.makeText(getBaseContext(), "Enter the value", Toast.LENGTH_SHORT).show();
+            return;
+        } else
+        try {
+            if (Integer.parseInt(edtRange.getText().toString()) < 0 || Integer.parseInt(edtRange.getText().toString()) > Integer.MAX_VALUE) {
+                Toast.makeText(getBaseContext(), "Enter the value from 0 to " + String.valueOf(Integer.MAX_VALUE), Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } catch (NumberFormatException ne){
+            Toast.makeText(getBaseContext(), "Enter the value from 0 to " + String.valueOf(Integer.MAX_VALUE), Toast.LENGTH_SHORT).show();
             return;
         }
         edtRange.clearFocus();
@@ -137,10 +161,12 @@ public class GeneratorActivity extends AppCompatActivity {
             // if range <= max range in DB (cache) then load primes from DB
             DBAdapter.getInstance(getApplicationContext()).insertHistoryItem(timeFormat.format(Calendar.getInstance().getTime()), edtRange.getText().toString(), EditTextDialog.threadCount, 0);
             Toast.makeText(getBaseContext(), "From chache", Toast.LENGTH_SHORT).show();
-            set( DBAdapter.getInstance(getApplicationContext()).getCache(range)/*getIntegerArray(stringToArray(db.getCacheValue()), range)*/);
+
+            set( DBAdapter.getInstance(getApplicationContext()).getCache(range));
         } else {
             mStartTime = SystemClock.elapsedRealtime();
             fragment.createTreads(EditTextDialog.threadCount, range);
+
         }
     }
 
@@ -154,12 +180,17 @@ public class GeneratorActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.item1:
-                showEditDialog();
+                if (!pb.isShown()) {
+                    showEditDialog();
+                }
                 return true;
 
             case R.id.item2:
-                Intent intent = new Intent(this, HistoryActivity.class);
-                startActivity(intent);
+                if (!pb.isShown()) {
+                    Intent intent = new Intent(this, HistoryActivity.class);
+                    startActivity(intent);
+                }
+
                 return true;
 
             default:
@@ -168,6 +199,7 @@ public class GeneratorActivity extends AppCompatActivity {
 
         }
     }
+
     private void showEditDialog() {
         FragmentManager fm = getFragmentManager();
         EditTextDialog editNameDialog = new EditTextDialog();
@@ -203,8 +235,14 @@ public class GeneratorActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        DBAdapter.getInstance(getApplicationContext()).close();
+
         Log.d("act", "onDestroy");
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     @Override
@@ -216,9 +254,8 @@ public class GeneratorActivity extends AppCompatActivity {
     //show primes
     public void set(ArrayList<Integer> arr){
 
-        Collections.sort(arr);
         ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(GeneratorActivity.this,
-                        android.R.layout.simple_list_item_1, arr);
+                android.R.layout.simple_list_item_1, arr);
         lv.setAdapter(adapter);
 
     }
@@ -231,7 +268,6 @@ public class GeneratorActivity extends AppCompatActivity {
             inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         }
     }
-
 
 }
 

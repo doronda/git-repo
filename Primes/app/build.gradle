@@ -30,4 +30,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.github.lecho:hellocharts-android:v1.5.8'
+    compile 'com.github.orangegangsters:swipy:1.2.0@aar'
 }

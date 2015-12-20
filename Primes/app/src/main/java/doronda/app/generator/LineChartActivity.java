@@ -111,7 +111,6 @@ public class LineChartActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        DBAdapter.getInstance(getApplicationContext()).close();
         Log.d("act", "onDestroy");
     }
 }

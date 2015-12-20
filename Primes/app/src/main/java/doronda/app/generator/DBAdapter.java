@@ -106,6 +106,26 @@ public class DBAdapter {
 
         return arr;
     }
+    // get value from cache
+    public int getMaxCacheId() {
+        Cursor c = mDB.rawQuery("SELECT _id FROM cache WHERE MAX(cache)", new String[]{""});
+        c.moveToFirst();
+        int res = c.getInt(0);
+        c.close();
+        return res;
+    }
+    public ArrayList<Integer> getCache(int start, int end, int value) {
+        ArrayList<Integer> arr = new ArrayList<>();
+        Cursor c = mDB.rawQuery("SELECT cache FROM cache WHERE (_id between ? and ?) AND cache <= ?", new String[]{"" + String.valueOf(start), String.valueOf(end), String.valueOf(value)});
+
+        if (c.moveToFirst()) {
+            do {
+                arr.add(c.getInt(0));
+            } while (c.moveToNext());
+        }
+
+        return arr;
+    }
     // get threads value for range from history
     public HashSet<Integer> getThreads(int range) {
         HashSet<Integer> arr = new HashSet<>();
@@ -199,9 +219,9 @@ public class DBAdapter {
     private static class DatabaseHelper extends SQLiteOpenHelper {
         private static DatabaseHelper dbHelperInstance;
 
-        public static DatabaseHelper getInstance(Context context) {
+        public static synchronized  DatabaseHelper getInstance(Context context) {
             if (dbHelperInstance == null) {
-                dbHelperInstance = new DatabaseHelper(context.getApplicationContext());
+                dbHelperInstance = new DatabaseHelper(context);
             }
             return dbHelperInstance;
         }

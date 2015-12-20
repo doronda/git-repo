@@ -36,11 +36,9 @@ public class HistoryActivity extends AppCompatActivity implements LoaderCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
-        DBAdapter.getInstance(getApplicationContext()).open();
-
         lv = (ListView)findViewById(R.id.lv_history);
         scAdapter = new SimpleCursorAdapter(this, R.layout.item, null, from, to, 0);
-
+        DBAdapter.getInstance(getApplicationContext()).open();
         lv.setAdapter(scAdapter);
         lv.setLongClickable(true);
         //show dialog with primes for this range
@@ -73,10 +71,22 @@ public class HistoryActivity extends AppCompatActivity implements LoaderCallback
         });
         getSupportLoaderManager().initLoader(0, null, this);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        DBAdapter.getInstance(getApplicationContext()).close();
         Log.d("act", "onDestroy");
     }
 

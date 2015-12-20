@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 public class GeneratorFragment extends Fragment {
 
-    private boolean isTaskRunning = false;
+    public static boolean isTaskRunning = false;
 
     @Override
     public void onAttach(Context context) {
@@ -73,6 +73,7 @@ public class GeneratorFragment extends Fragment {
         if (GeneratorActivity.pb.isShown()) {
             GeneratorActivity.pb.setVisibility(ProgressBar.INVISIBLE);
         }
+
         super.onDetach();
         Log.d("d", "onDetach");
     }
@@ -101,15 +102,6 @@ public class GeneratorFragment extends Fragment {
             bundle.putIntegerArrayList("ARR", arr1);
             msg.setData(bundle);
             GeneratorActivity.handler.sendMessage(msg);
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (GeneratorActivity.pb.isShown()) {
-                        GeneratorActivity.pb.setVisibility(ProgressBar.INVISIBLE);
-                    }
-                    isTaskRunning = false;
-                }
-            });
 
         }
     }
