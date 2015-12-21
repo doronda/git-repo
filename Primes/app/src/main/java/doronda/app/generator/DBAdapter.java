@@ -7,6 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -96,15 +97,24 @@ public class DBAdapter {
     // get value from cache
     public ArrayList<Integer> getCache(int value) {
         ArrayList<Integer> arr = new ArrayList<>();
+        Log.d("1", "1");
         Cursor c = mDB.rawQuery("SELECT cache FROM cache WHERE cache <= ?", new String[]{"" + String.valueOf(value)});
-
+        Log.d("1", "2");
         if (c.moveToFirst()) {
             do {
                 arr.add(c.getInt(0));
             } while (c.moveToNext());
         }
-
+        Log.d("1", "3");
         return arr;
+    }
+    public Cursor getCacheCur(int value) {
+        ArrayList<Integer> arr = new ArrayList<>();
+        Log.d("1", "1");
+        Cursor c = mDB.rawQuery("SELECT _id, cache FROM cache WHERE cache <= ?", new String[]{"" + String.valueOf(value)});
+        Log.d("1", "2");
+
+        return c;
     }
     // get value from cache
     public int getMaxCacheId() {

@@ -4,12 +4,15 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -24,28 +27,32 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
-import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout;
-import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayoutDirection;
-
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
+import android.support.v4.content.CursorLoader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 
-public class GeneratorActivity extends AppCompatActivity  {
+public class GeneratorActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     static int NUMBER_OF_CORES;
     ListView lv;
-    private int range;
+    private static int range  = 0;
     private GeneratorFragment fragment;
     private ArrayList arr;
     public static Handler handler;
     public static  ProgressBar pb;
-    EditText edtRange;
+    static EditText edtRange;
     int count = 0;
     long mStartTime;
+    SimpleCursorAdapter scAdapter;
+    String[] from = new String[] { DBAdapter.COLUMN_CACHE};
+    int[] to = new int[] { android.R.id.text1};
 
     private static SimpleDateFormat timeFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
@@ -59,7 +66,8 @@ public class GeneratorActivity extends AppCompatActivity  {
         NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
         arr = new ArrayList<>();
         lv = (ListView) findViewById(R.id.list_simple_didgites);
-
+        scAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, null, from, to, 0);
+        lv.setAdapter(scAdapter);
         if (savedInstanceState == null) {
             fragment = new GeneratorFragment();
             getFragmentManager().beginTransaction().add(android.R.id.content, fragment).commit();
@@ -69,7 +77,7 @@ public class GeneratorActivity extends AppCompatActivity  {
             if(savedInstanceState.containsKey("ARR")){
                 arr.clear();
                 arr.addAll(savedInstanceState.getIntegerArrayList("ARR"));
-                set(arr);
+                set();
             }
         }
 
@@ -128,7 +136,7 @@ public class GeneratorActivity extends AppCompatActivity  {
 
                     }
 
-                    set(arr);
+                    set();
                     if (GeneratorActivity.pb.isShown()) {
                         GeneratorActivity.pb.setVisibility(ProgressBar.INVISIBLE);
                     }
@@ -136,6 +144,7 @@ public class GeneratorActivity extends AppCompatActivity  {
                 }
             }
         };
+        getSupportLoaderManager().initLoader(0, null, this);
     }
     // Start primes generation
     public void startGeneration(){
@@ -161,8 +170,13 @@ public class GeneratorActivity extends AppCompatActivity  {
             // if range <= max range in DB (cache) then load primes from DB
             DBAdapter.getInstance(getApplicationContext()).insertHistoryItem(timeFormat.format(Calendar.getInstance().getTime()), edtRange.getText().toString(), EditTextDialog.threadCount, 0);
             Toast.makeText(getBaseContext(), "From chache", Toast.LENGTH_SHORT).show();
+new Thread(new Runnable() {
+    @Override
+    public void run() {
+        set();
+    }
+}).start();
 
-            set( DBAdapter.getInstance(getApplicationContext()).getCache(range));
         } else {
             mStartTime = SystemClock.elapsedRealtime();
             fragment.createTreads(EditTextDialog.threadCount, range);
@@ -248,15 +262,13 @@ public class GeneratorActivity extends AppCompatActivity  {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putIntegerArrayList("ARR", arr);
+        //outState.putIntegerArrayList("ARR", arr);
 
     }
     //show primes
-    public void set(ArrayList<Integer> arr){
+    public void set(){
 
-        ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(GeneratorActivity.this,
-                android.R.layout.simple_list_item_1, arr);
-        lv.setAdapter(adapter);
+        getSupportLoaderManager().getLoader(0).forceLoad();
 
     }
 
@@ -269,6 +281,36 @@ public class GeneratorActivity extends AppCompatActivity  {
         }
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CacheCursorLoader(this, DBAdapter.getInstance(getApplicationContext()));
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        scAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    static class CacheCursorLoader extends CursorLoader {
+
+        DBAdapter db;
+
+        public CacheCursorLoader(Context context, DBAdapter db) {
+            super(context);
+            this.db = db;
+        }
+
+        @Override
+        public Cursor loadInBackground() {
+            Cursor cursor = db.getCacheCur(range);
+            return cursor;
+        }
+    }
 }
 
 
